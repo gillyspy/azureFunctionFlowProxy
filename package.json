@@ -6,6 +6,10 @@
     "start": "func start --verbose",
     "test": "echo \"No tests yet...\""
   },
-  "dependencies": {},
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "dotenv": "^10.0.0",
+    "request": "^2.88.2"
+  },
   "devDependencies": {}
 }
