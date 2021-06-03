@@ -1,22 +1,23 @@
 const crypto = require("crypto");
 const request = require("request");
+const {Routing} = require('./Routing.js');
 
 //expand process.env with my local settings
 require('dotenv').config();
+const RoutingMap = {"abort" : true}; 
+
+if( process.env.ROUTINGMAP ) 
+     Object.assign(
+         RoutingMap, 
+          require('./_RoutingMap.json') ,
+         { "abort" : false }
+    ); 
 
 const myCfg = {
-    secret : process.env.SECRET_TT,
-    flow : 'https://prod-01.westus.logic.azure.com:443/workflows/' 
-    + 'd2d5faed674c431b8db4d179983874be/triggers/manual/paths/invoke?'
-    + 'api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig='
-    + process.env.FLOWSIG_TT
+    secret : process.env.SECRET_TT
 }
 
-const bufSecret = Buffer(
-    myCfg.secret,
-    'base64'
-);
-const flowWebhook = myCfg.flow;
+const bufSecret = Buffer( process.env.SECRET_TT, 'base64');    
 
 module.exports = function (context, req) {
   var auth = req.headers["authorization"];
@@ -25,22 +26,34 @@ module.exports = function (context, req) {
   var msgBuf = Buffer.from(req.rawBody, "utf8");
   var msgHash ="HMAC " + crypto.createHmac("sha256", bufSecret).update(msgBuf).digest("base64");
 
+  //if( RoutingMap.entries().length === 0){
+    if( RoutingMap.abort){
+    //TODO : return 404 resource not found
+  } else 
   if (msgHash == auth ) {
     let userText = 'default';
     let forwardBody = JSON.parse(req.rawBody); 
 
-    if (forwardBody.text){
-        userText = forwardBody.text.match(/^([<]at[>])?Sf link([<]\/at[>])?\s?(.*?)(\\n)?$/im)[3];
-        
-    }
+    /*
+    * extract Bot name and command text, etc
+     */
+    let [ botName, commandText, otherText  ] = forwardBody.text
+    .match(/^(?:[<]at[>])(.+)(?:[<]\/at[>])\s?([^\s]+)\s?(.*?)(?:\\n)?$/i).slice(1);
 
-     context.log('userText',userText, myCfg.secret ); 
+    userText = commandText || userText; 
+    const myRouting = Routing( botName, RoutingMap )
+
+    
     Object.assign(forwardBody, {
-      userText: userText,
+      userCommand : {
+        userText: userText,
+        botName : botName,
+        otherText : otherText
+      }
     });
-
+    context.log( forwardBody.userCommand, myCfg.secret, myRouting.url ); 
     request.post(
-      flowWebhook,
+      myRouting.url,
       {
         body: JSON.stringify(forwardBody),
         headers: { "content-type": "application/json" },
