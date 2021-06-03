@@ -17,11 +17,6 @@ module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function RegExJS processing.. a request.');
 
     //constructor(str = '', method = 'test', pattern = '^$', flags = 'gim', replace = '$1'){
-    const escapedPattern = req.body.pattern.replace( /\\/, '\\\\' );
-    context.log(JSON.stringify({
-        "pattern" : req.body.pattern,
-        "escapedPattern" :  escapedPattern
-    }));
 
     let result = [];
     let strings; 
