@@ -13,10 +13,6 @@ if( process.env.ROUTINGMAP )
          { "abort" : false }
     ); 
 
-const myCfg = {
-    secret : process.env.SECRET_TT
-}
-
 const bufSecret = Buffer( process.env.SECRET_TT, 'base64');    
 
 module.exports = function (context, req) {
@@ -41,8 +37,8 @@ module.exports = function (context, req) {
     .match(/^(?:[<]at[>])(.+)(?:[<]\/at[>])\s?([^\s]+)\s?(.*?)(?:\\n)?$/i).slice(1);
 
     userText = commandText || userText; 
-    const myRouting = Routing( botName, RoutingMap )
-
+    context.log( forwardBody.userCommand, RoutingMap ); 
+    const myRouting = new Routing( botName, RoutingMap )
     
     Object.assign(forwardBody, {
       userCommand : {
@@ -51,7 +47,8 @@ module.exports = function (context, req) {
         otherText : otherText
       }
     });
-    context.log( forwardBody.userCommand, myCfg.secret, myRouting.url ); 
+    context.log( forwardBody.userCommand, myRouting.url ); 
+
     request.post(
       myRouting.url,
       {
@@ -59,11 +56,6 @@ module.exports = function (context, req) {
         headers: { "content-type": "application/json" },
       },
       function (error, response, body) {
-        const rawBody = JSON.stringify({
-          rawBody: req.rawBody,
-          error: error || "",
-        });
-
         context.res = {
           headers: { "content-type": "application/json" },
           body : JSON.stringify({
