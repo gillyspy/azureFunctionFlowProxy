@@ -28,7 +28,7 @@ const _m = {
   },
   doExec: function () {
     let r = _m.initRgx(cfg.pattern, cfg.flags);
-    let result = cfg.string.exec(r);
+    let result = r.exec(cfg.string);
     _m.closeRgx(r);
     return result;
   },
