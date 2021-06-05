@@ -13,7 +13,7 @@ if( process.env.ROUTINGMAP )
          { "abort" : false }
     ); 
 
-const bufSecret = Buffer( process.env.SECRET_TT, 'base64');    
+const bufSecret = Buffer.from( process.env.SECRET_TT, 'base64');    
 
 module.exports = function (context, req) {
   var auth = req.headers["authorization"];
