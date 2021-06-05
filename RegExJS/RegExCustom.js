@@ -81,6 +81,8 @@ class RegExCustom {
         case "matchAll":
           result = _m.doMatchAll();
         default:
+          result = null;
+          message = "not supported"
           break;
       }
     } catch (e) {
