@@ -42,7 +42,7 @@ const _m = {
     let r = _m.initRgx(cfg.pattern, cfg.flags, 0);    
     let result = cfg.string.matchAll(r);
     _m.closeRgx(r);
-    return result;
+    return Array.from( result );
   },
 };
 
@@ -78,6 +78,8 @@ class RegExCustom {
         case "replace":
           result = _m.doReplace();
           break;
+        case "matchAll":
+          result = _m.doMatchAll();
         default:
           break;
       }
